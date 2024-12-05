@@ -1,6 +1,4 @@
-# Guss
-
-# FCC BDC API Python Package
+# Guss The FCC BDC API Python 
 
 This Python package provides an easy-to-use interface for interacting with the Federal Communications Commission (FCC) Broadband Data Collection (BDC) API. It allows users to programmatically download mobile broadband service data, including availability, speeds, providers, and other relevant information for various geographic locations in the United States.
 
