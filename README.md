@@ -212,7 +212,7 @@ if __name__ == '__main__':
       except GussExceptions as e:
         print(f"error: {e}")
 ```
-#### The code above will download ATT's (130077) and T-Mobile's (130403) Mobile Broadband Coverage in Washington D.C. represented as h3 hexagon. The output files are in the ~/data/output/shp folder.
+#### The code above will download ATT's (130077) and T-Mobile's (130403) Mobile Broadband Coverage in Washington D.C. represented as h3 hexagon. The output files will be outputed in the ~/data/output/shp folder.
 
 ---
 ### Notes
