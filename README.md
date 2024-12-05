@@ -60,7 +60,7 @@ In the root directory of your project, create a new file named .env.
 This file will store your credentials and configuration settings, such as the API credentials and base URL. 
 To get your API credentials please visit: https://bdc.fcc.gov/ to create an account to get username and register to get your hash code needed to populate .env file
 ```
-plaintext
+
 credentials = {'USERNAME':'', 'HASH_VALUE':''}
 BASE_URL = 'https://broadbandmap.fcc.gov'
 ```
