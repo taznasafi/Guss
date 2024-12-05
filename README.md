@@ -55,6 +55,18 @@ pip install -r requirements.txt
 
 ## Usage
 
+### create a .env file
+In the root directory of your project, create a new file named .env.
+
+### Add the following content to the .env file:
+This file will store your credentials and configuration settings, such as the API credentials and base URL. 
+To get your API credentials please visit: https://bdc.fcc.gov/ to create an account to get username and register to get your hash code needed to populate .env file
+```
+plaintext
+credentials = {'USERNAME':'', 'HASH_VALUE':''}
+BASE_URL = 'https://broadbandmap.fcc.gov'
+```
+---
 
 ### Running `main.py` in VSCode Interpreter
 
@@ -191,7 +203,7 @@ if __name__ == '__main__':
         download_provider_coverage_data(
             run=True,
             as_of_date="2024-12-01",
-            provider_id_list=["provider1", "provider2"],
+            provider_id_list=["providerid1", "providerid2"],
             state_fips_list=["01", "06"],
             technology_list=[300, 400, 500],
             technology_type="Mobile Broadband",
@@ -201,3 +213,9 @@ if __name__ == '__main__':
         )
       except GussExceptions as e:
         print(f"error: {e}")
+```
+### Notes
+- Ensure that the as_of_date is correctly formatted as 'YYYY-MM-DD' to avoid errors.
+- The state_fips_list can include ["ALL"] if you need data for all U.S. states and territories. **Do not include 'ALL'** if individual states are desired.
+- The FiveG_speed_tier_list is used for filtering 5G data based on download/upload speeds. Provide the values in the format "download_speed/upload_speed".
+- The gis_type option allows you to choose between Shapefile (SHP) or GeoPackage (GPKG) formats for geographic data
