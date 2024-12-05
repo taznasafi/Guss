@@ -154,7 +154,7 @@ The function accepts various parameters to customize the query, enabling flexibi
   - **Options**:
     - If querying specific states/territories, provide the list of FIPS codes (e.g., `["01", "06"]` for Alabama and California).
     - If querying all FIPS codes, use `["ALL"]` to select all states/territories.
-  - **Example**: `["01", "06", "ALL"]`
+  - **Example**: `["01", "06"] or ["ALL"]`
 
 - **`technology_list`**: `list`
   - **Description**: A list of technology codes used by the service provider to report service availability. Each code corresponds to a specific technology.
