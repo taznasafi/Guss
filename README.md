@@ -201,8 +201,8 @@ if __name__ == '__main__':
         download_provider_coverage_data(
             run=True,
             as_of_date="2024-12-01",
-            provider_id_list=["providerid1", "providerid2"],
-            state_fips_list=["01", "06"],
+            provider_id_list=[130077, 130403],
+            state_fips_list=['11'],
             technology_list=[300, 400, 500],
             technology_type="Mobile Broadband",
             subcategory="Hexagon Coverage",
@@ -212,6 +212,8 @@ if __name__ == '__main__':
       except GussExceptions as e:
         print(f"error: {e}")
 ```
+The code above will download ATT's (130077) and T-Mobile's (130403) Mobile Broadband Coverage represented as h3 hexagon. The output files are in the ~/data/output/shp folder.  
+---
 ### Notes
 - Ensure that the as_of_date is correctly formatted as 'YYYY-MM-DD' to avoid errors.
 - The state_fips_list can include ["ALL"] if you need data for all U.S. states and territories. **Do not include 'ALL'** if individual states are desired.
