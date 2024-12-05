@@ -200,7 +200,7 @@ if __name__ == '__main__':
     try:
         download_provider_coverage_data(
             run=True,
-            as_of_date="2024-12-01",
+            as_of_date="2024-06-30",
             provider_id_list=[130077, 130403],
             state_fips_list=['11'],
             technology_list=[300, 400, 500],
