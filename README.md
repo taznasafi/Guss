@@ -15,6 +15,7 @@ This Python package provides an easy-to-use interface for interacting with the F
 - Python 3.6 or higher
 - Requests library (for making API calls)
 - Pandas
+- python-dotenv
   
 ## Installation
 
