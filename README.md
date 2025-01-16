@@ -150,7 +150,9 @@ The function accepts various parameters to customize the query, enabling flexibi
 
 - **`provider_id_list`**: `list`
   - **Description**: A list of unique identifiers for the service provider(s) you wish to query.
-  - **Example**: `["provider1", "provider2"]`
+  - If querying all providers, use `["ALL"]` to select all/any providers.
+  - **Example**: `["130077", "130403"]` or `["ALL"]`
+    
 
 - **`state_fips_list`**: `list`
   - **Description**: A list of 2-digit FIPS codes for the states or territories you want to include in the query. The FIPS code should be included with a leading zero. 
