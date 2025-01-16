@@ -1,4 +1,4 @@
-from bin import download_mb_coverage as dc
+from bin.download_mb_coverage import download_provider_state_coverage_data
 from guss.gussErrors import GussExceptions
 
 ### how to use Guss to download bdc data
@@ -11,7 +11,8 @@ from guss.gussErrors import GussExceptions
 
 :param as_of_date: string, as_of_date (date format ‘YYYY-MM-DD’) - required
 
-:param provider_id_list: list, list of unique identifier for the service provider
+:param provider_id_list: list, list of unique identifier for the service provider. if all Fips code is desired, then option of 
+                        ["ALL"] is advised.
 
 :param state_fips_list: list, a list of 2-digit FIPS code for the selected state / territory from the current U.S. Census
                         Bureau data, please include leading zero. if all Fips code is desired, then option of 
@@ -38,20 +39,20 @@ if __name__ == '__main__':
     try:
 
         # raw coverage
-        output_raw_coverage_path_list = dc.download_provider_coverage_data(run=True, as_of_date="2024-06-30",
-                                                                           provider_id_list=[130077, 130403, 131425, 131310],
-                                                                           state_fips_list=["11"],
-                                                                           technology_list=[400, 300, 500], technology_type="Mobile Broadband",
-                                                                           subcategory='Hexagon Coverage', FiveG_speed_tier_list=['7/1', '35/3'],
-                                                                           gis_type="gpkg")
+        output_raw_coverage_path_list = download_provider_state_coverage_data(run=True, as_of_date="2024-06-30",
+                                                                              provider_id_list=['all'],
+                                                                              state_fips_list=["11"],
+                                                                              technology_list=[400, 300, 500], technology_type="Mobile Broadband",
+                                                                              subcategory='Hexagon Coverage', FiveG_speed_tier_list=['7/1', '35/3'],
+                                                                              gis_type="gpkg")
 
         # hexagon coverage
-        output_hexagon_coverage_path_list = dc.download_provider_coverage_data(run=True, as_of_date="2024-06-30",
-                                                                               provider_id_list=[130077, 130403, 131425, 131310],
-                                                                               state_fips_list=["11"],
-                                                                               technology_list=[400, 300, 500], technology_type="Mobile Broadband",
-                                                                               subcategory='Raw Coverage', FiveG_speed_tier_list=['7/1', '35/3'],
-                                                                               gis_type="gpkg")
+        output_hexagon_coverage_path_list = download_provider_state_coverage_data(run=False, as_of_date="2024-06-30",
+                                                                                  provider_id_list=[130077, 130403, 131425, 131310],
+                                                                                  state_fips_list=["11"],
+                                                                                  technology_list=[400, 300, 500], technology_type="Mobile Broadband",
+                                                                                  subcategory='Raw Coverage', FiveG_speed_tier_list=['7/1', '35/3'],
+                                                                                  gis_type="gpkg")
 
 
     except GussExceptions as e:

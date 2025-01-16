@@ -7,7 +7,8 @@ import ast
 from guss.gussErrors import GussExceptions
 from guss.GEO_CENSEY import Fipsy
 
-from . import DATA_INPUT, DATA_OUTPUT,CSV_OUTPUT, GPK_OUTPUT, SHP_OUTPUT
+from . import DATA_INPUT, DATA_OUTPUT, CSV_OUTPUT, GPK_OUTPUT, SHP_OUTPUT
+
 
 class Guss:
 
@@ -20,6 +21,29 @@ class Guss:
         self.__request_header = None
         self.__request_param = None
         self.__response = None
+        self.category = {1: 'Summary', 2: "State", 3: "Provider"}
+        self.subcategory = {1: "summary by Geography Type - CensusPlace",
+                            2: "Summary by Geography Type - Other Geographies",
+                            3: "Summary by Geography Type - Census Place",
+                            4: "Provider Summary by Geography Type",
+                            5: "Provider Summary",
+                            6: "Provider List",
+                            7: "Location Coverage",
+                            8: "Hexagon Coverage",
+                            9: "Location Coverage",
+                            10: "Hexagon Coverage",
+                            11: "Raw Coverage",
+                            12: "Supporting Data"
+                            }
+        self.technology_type = {1: 'Fixed Broadband',
+                                2: 'Mobile Broadband',
+                                3: 'Mobile Voice'
+                                }
+        self.FiveG_speed_teir = ["35/3", "7/1"]
+
+
+
+
 
     @property
     def baseUrl(self):
@@ -91,8 +115,7 @@ class Guss:
             f.write(response)
         print(f"Saved File to: {output}")
 
-    def send_request(self, return_df=None, save_file=False, file_name=None, gis_data_type=None):
-
+    def api_request(self):
         try:
 
             self.request_header = {
@@ -109,38 +132,12 @@ class Guss:
             else:
                 r = requests.request(method="GET", url=url, params=self.request_param, headers=self.request_header)
 
-
-
             # error handling
             status = r.status_code
             if status >= 400 and status < 500:
                 r.raise_for_status()
 
-            self.response = r
-
-            if return_df:
-                df = pd.json_normalize(self.response.json()["data"])
-                if "as_of_date" in df.columns:
-                    df['as_of_date'] = [pd.to_datetime(x).strftime("%Y-%m-%d") for x in df['as_of_date']]
-                if save_file and file_name:
-                    output = os.path.join(CSV_OUTPUT, file_name)
-                    df.to_csv(output)
-                else:
-                    return warnings.warn("please enter a filename")
-                return df
-
-            if save_file and file_name:
-                if str(gis_data_type).lower() == 'gpkg':
-                    self.save_file(response=self.response.content, output_path=GPK_OUTPUT, file_name=file_name)
-                    return os.path.join(GPK_OUTPUT, file_name)
-
-                elif str(gis_data_type).lower() == 'shp':
-                    self.save_file(response=self.response.content, output_path=SHP_OUTPUT, file_name=file_name)
-                    return os.path.join(SHP_OUTPUT, file_name)
-                else:
-                    return warnings.warn("please indicate the what type of GIS data that is, options are:\n1)\tGPKG\n2)\tSHP")
-
-            return r.json()
+            return r
 
         # error handling
         except requests.exceptions.HTTPError as errh:
@@ -152,11 +149,53 @@ class Guss:
         except requests.exceptions.RequestException as err:
             raise GussExceptions(err.__str__())
 
+    def get_request(self, return_df=None, gis_data_type=None, save_file=False, file_name=None):
+
+        try:
+
+            self.response = self.api_request()
+
+            if return_df:
+                df = pd.json_normalize(self.response.json()["data"])
+                if "as_of_date" in df.columns:
+                    df['as_of_date'] = [pd.to_datetime(x).strftime("%Y-%m-%d") for x in df['as_of_date']]
+                if save_file and file_name:
+                    output = os.path.join(CSV_OUTPUT, file_name)
+                    df.to_csv(output)
+
+                else:
+                    return warnings.warn("please enter a filename")
+                return df
+            else:
+                if save_file and file_name:
+                    output = os.path.join(CSV_OUTPUT, file_name)
+                    self.save_file(self.response.content, output_path=CSV_OUTPUT, file_name=file_name)
+                    return output
+
+            if save_file and file_name:
+                if str(gis_data_type).lower() == 'gpkg':
+                    self.save_file(response=self.response.content, output_path=GPK_OUTPUT, file_name=file_name)
+                    return os.path.join(GPK_OUTPUT, file_name)
+
+                elif str(gis_data_type).lower() == 'shp':
+                    self.save_file(response=self.response.content, output_path=SHP_OUTPUT, file_name=file_name)
+                    return os.path.join(SHP_OUTPUT, file_name)
+                else:
+                    return warnings.warn(
+                        "please indicate the what type of GIS data that is, options are:\n1)\tGPKG\n2)\tSHP")
+
+            return self.response.json()
+
+        # error handling
+
+        except GussExceptions as e:
+            raise GussExceptions(f"error: {e}")
+
     def get_as_of_dates(self):
 
         # get as of Dates
         self.url_endpoint = '/api/public/map/listAsOfDates'
-        aod_list = self.send_request(return_df=True, save_file=True, file_name="as_of_date.csv")
+        aod_list = self.get_request(return_df=True, save_file=True, file_name="as_of_date.csv")
         return aod_list
 
     def get_download_reference(self, as_of_date=None):
@@ -168,9 +207,31 @@ class Guss:
             as_of_date = '2024-06-30'
 
         self.url_endpoint = f'/api/public/map/downloads/listAvailabilityData/{as_of_date}'
-        reference_df = self.send_request(return_df=True, save_file=True,
-                                         file_name=f"download_reference_list_as_of_date_{as_of_date}.csv")
+        reference_df = self.get_request(return_df=True, save_file=True,
+                                        file_name=f"download_reference_list_as_of_date_{as_of_date}.csv")
         return reference_df
 
+    def download_file(self, data_type, file_id, file_name, gis_type):
+
+        if str(data_type).lower() == "availability":
+            pass
+        elif str(data_type).lower() == 'challenge':
+            pass
+        else:
+            raise GussExceptions(f"data_type: {data_type}-- it should be either : availability or challenge")
+
+        file_type = ""
+        if gis_type is not None:
+            if gis_type.lower() == "shp":
+                file_type = '1'
+                self.url_endpoint = f"/api/public/map/downloads/downloadFile/{data_type}/{file_id}/{file_type}"
+            elif gis_type.lower() == 'gpkg':
+                file_type = '2'
+                self.url_endpoint = f"/api/public/map/downloads/downloadFile/{data_type}/{file_id}/{file_type}"
+        else:
+            self.url_endpoint = f"/api/public/map/downloads/downloadFile/{data_type}/{file_id}"
 
 
+        saved_output = self.get_request(save_file=True, return_df=False, file_name=file_name, gis_data_type=gis_type)
+
+        return saved_output

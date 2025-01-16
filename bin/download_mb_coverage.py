@@ -1,12 +1,12 @@
 import os
 import ast
 import warnings
-
+import re
 from guss import GUSS
 from guss.gussErrors import GussExceptions
 
 
-def get_as_of_dates(run=False):
+def view_as_of_dates(run=False):
     credentials = ast.literal_eval(os.environ['credentials'])
 
     guss = GUSS.Guss(**credentials)
@@ -15,20 +15,21 @@ def get_as_of_dates(run=False):
         print(aod)
 
 
-def get_download_reference(run=False, as_of_date=None):
+def view_download_reference(run=False, as_of_date=None):
     credentials = ast.literal_eval(os.environ['credentials'])
     guss = GUSS.Guss(**credentials)
 
     if run:
         reference_df = guss.get_download_reference(as_of_date=as_of_date)
-        return reference_df
+        print(reference_df)
 
 
-def download_provider_coverage_data(run: bool = True,
-                                    as_of_date: str = "2024-06-30", provider_id_list: list = None,
-                                    state_fips_list: list = None, technology_list: list = None,
-                                    technology_type: str = None, subcategory: str = None,
-                                    FiveG_speed_tier_list: list = None, data_type: str = 'availability', gis_type: str = None) -> list:
+def download_provider_state_coverage_data(run: bool = True,
+                                          as_of_date: str = "2024-06-30", provider_id_list: list = None,
+                                          state_fips_list: list = None, technology_list: list = None,
+                                          technology_type: str = None, subcategory: str = None,
+                                          FiveG_speed_tier_list: list = None, data_type: str = 'availability',
+                                          gis_type: str = None) -> list:
     """
 
     :param run: bool, True if you want to run the function, False to dry run
@@ -77,10 +78,10 @@ def download_provider_coverage_data(run: bool = True,
         guss = GUSS.Guss(**credentials)
 
 
-        reference_df = get_download_reference(run=True, as_of_date=as_of_date)
+        reference_df = guss.get_download_reference(as_of_date=as_of_date)
 
-        if len(reference_df) == 0:
-            raise GussExceptions(message="please check your as of date, no reference found")
+        if reference_df.empty:
+            raise GussExceptions(message="Error: Check your query parameters")
 
         reference_df_filtered = reference_df[
 
@@ -90,6 +91,10 @@ def download_provider_coverage_data(run: bool = True,
             & (reference_df["file_type"] == 'gis')
 
             ]
+
+        if reference_df_filtered.empty:
+            raise GussExceptions(message="Error: Check your category or subcategory or technology_type,"
+                                         " or file_type query parameters")
 
         num_provider = len(provider_id_list)
         num_state = len(state_fips_list)
@@ -144,12 +149,15 @@ def download_provider_coverage_data(run: bool = True,
         else:
             raise GussExceptions(message="No speed tier list provided")
 
-        if 'all' in [x.lower() for x in state_fips_list]:
+        if ('all' in [x.lower() for x in state_fips_list]) and ('all' in [x.lower() for x in provider_id_list]):
+            query_string = f"({technology_query}) and ({speed_tier_query})"
+        elif 'all' in [x.lower() for x in state_fips_list]:
             query_string = f"({provider_id_query}) and ({technology_query}) and ({speed_tier_query})"
+        elif 'all' in [x.lower() for x in provider_id_list]:
+            query_string = f"({state_query}) and ({technology_query}) and ({speed_tier_query})"
+
         else:
             query_string = f"({provider_id_query}) and ({state_query}) and ({technology_query}) and ({speed_tier_query})"
-
-
 
         filter_df = reference_df_filtered.query(f"{query_string}").sort_values(by=['provider_id', 'state_fips', "technology_code", 'speed_tier'])
 
@@ -163,15 +171,6 @@ def download_provider_coverage_data(run: bool = True,
                   f"\nt\{query_string}")
 
 
-
-        file_type = ""
-        if gis_type.lower() == "shp":
-            file_type = '1'
-        elif gis_type.lower() == 'gpkg':
-            file_type = '2'
-        else:
-            raise GussExceptions("select only shp or gpkg for gis_type")
-
         output_path = []
         for i, row in filter_df.iterrows():
             print(row)
@@ -179,13 +178,9 @@ def download_provider_coverage_data(run: bool = True,
             file_id = row['file_id']
             file_name = f"{technology_type.replace(' ', '')}_{subcategory.replace(' ', '')}_{row['file_name']}.zip"
 
-            guss.url_endpoint = f'/api/public/map/downloads/downloadFile/{data_type}/{file_id}/{file_type}'
-            saved_output = guss.send_request(save_file=True, file_name=file_name, gis_data_type=gis_type)
+            saved_output = guss.download_file(data_type=data_type, file_id=file_id, file_name=file_name, gis_type=gis_type)
             output_path.append(saved_output)
 
         return output_path
-
-
-
 
 

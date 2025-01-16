@@ -1,5 +1,5 @@
 requests
 pandas
-dotenv
+python-dotenv
 
 
