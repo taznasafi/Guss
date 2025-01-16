@@ -222,6 +222,6 @@ if __name__ == '__main__':
 ---
 ### Notes
 - Ensure that the as_of_date is correctly formatted as 'YYYY-MM-DD' to avoid errors.
-- The state_fips_list can include ["ALL"] if you need data for all U.S. states and territories. **Do not include 'ALL'** if individual states are desired.
+- The state_fips_list can include ["ALL"] if you need data for all U.S. states and territories. **Do not include 'ALL'** if individual states are desired. Same **Rule** applies to provider_idj_list parameter.
 - The FiveG_speed_tier_list is used for filtering 5G data based on download/upload speeds. Provide the values in the format "download_speed/upload_speed".
 - The gis_type option allows you to choose between Shapefile (SHP) or GeoPackage (GPKG) formats for geographic data
