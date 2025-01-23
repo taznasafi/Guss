@@ -114,8 +114,7 @@ def download_location_fixed_coverage_by_state(run=False, as_of_date: str = '2024
 
         elif num_provider == 1:
             if 'all' in provider_id_list:
-                provider_id_query = f"provider_id == '*'"
-                filter_df = filter_df.query(provider_id_query)
+                filter_df = filter_df
             else:
                 provider_id_query = f"provider_id == '{provider_id_list[0]}'"
                 filter_df = filter_df.query(provider_id_query)
