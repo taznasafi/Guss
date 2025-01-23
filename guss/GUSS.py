@@ -44,6 +44,15 @@ class Guss:
                                 }
         self.technology_code = None
         self.FiveG_speed_tier = ["35/3", "7/1"]
+        self.challenge_category = (
+            ("Fabric Challenge - In Progress", "Fabric Challenge - In Progress"),
+            ("Fabric Challenge - Resolved", "Fabric Challenge - Resolved"),
+            ("FixedChallenge - Cumulative", "FixedChallenge - Cumulative"),
+            ("Fixed Challenge - In Progress", "Fixed Challenge - In Progress"),
+            ("Fixed Challenge - Resolved", "Fixed Challenge - Resolved"),
+            ("Mobile Challenge - In Progress", "Mobile Challenge - In Progress"),
+            ("Mobile Challenge - Resolved", "Mobile Challenge - Resolved"),
+        )
 
     @property
     def baseUrl(self):
@@ -126,12 +135,12 @@ class Guss:
 
             url = f"{self.baseUrl}{self.url_endpoint}"
 
-            if self.request_type == "GET":
+            if self.request_param is None:
 
                 r = requests.get(url=url, headers=self.request_header)
 
             else:
-                r = requests.request(method="GET", url=url, params=self.request_param, headers=self.request_header)
+                r = requests.request(method=str(self.request_type).upper(), url=url, params=self.request_param, headers=self.request_header)
 
             # error handling
             status = r.status_code
@@ -170,8 +179,11 @@ class Guss:
             else:
                 if save_file and file_name:
                     output = os.path.join(CSV_OUTPUT, file_name)
+                    print(output)
                     self.save_file(self.response.content, output_path=CSV_OUTPUT, file_name=file_name)
                     return output
+                else:
+                    GussExceptions(message="It looks like you did not provide file_name. please provide valid name")
 
             if save_file and file_name:
                 if str(gis_data_type).lower() == 'gpkg':
@@ -235,3 +247,23 @@ class Guss:
         saved_output = self.get_request(save_file=True, return_df=False, file_name=file_name, gis_data_type=gis_type)
 
         return saved_output
+
+    def list_challenge_data(self, as_of_date=None, file_name=None, params=None):
+
+        try:
+            self.request_type = 'GET'
+
+            if as_of_date is None:
+                as_of_date = '2024-06-30'
+
+            self.url_endpoint = f'/api/public/map/downloads/listChallengeData/{as_of_date}'
+
+            self.request_param = params
+
+            saved_output = self.get_request(save_file=True, return_df=True, file_name=file_name)
+
+            return saved_output
+
+        # error handling
+        except GussExceptions as e:
+            raise GussExceptions(f"error: {e}")

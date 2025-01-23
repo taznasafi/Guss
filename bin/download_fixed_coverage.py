@@ -6,24 +6,6 @@ from guss import GUSS
 from guss.gussErrors import GussExceptions
 
 
-def view_as_of_dates(run=False):
-    credentials = ast.literal_eval(os.environ['credentials'])
-
-    guss = GUSS.Guss(**credentials)
-    if run:
-        aod = guss.get_as_of_dates()
-        print(aod)
-
-
-def view_download_reference(run=False, as_of_date=None):
-    credentials = ast.literal_eval(os.environ['credentials'])
-    guss = GUSS.Guss(**credentials)
-
-    if run:
-        reference_df = guss.get_download_reference(as_of_date=as_of_date)
-        print(reference_df)
-
-
 def download_location_fixed_coverage_by_state(run=False, as_of_date: str = '2024-06-30',
                                               data_type: object = 'availability',
                                               provider_id_list: list = None,
@@ -46,7 +28,6 @@ def download_location_fixed_coverage_by_state(run=False, as_of_date: str = '2024
 
         reference_df = guss.get_download_reference(as_of_date=as_of_date)
 
-
         if reference_df.empty:
             raise GussExceptions(message="please check your as of date, no reference found")
 
@@ -67,7 +48,6 @@ def download_location_fixed_coverage_by_state(run=False, as_of_date: str = '2024
         num_technology = len(technology_list)
         num_provider = len(provider_id_list)
 
-
         if num_state > 1:
             state_list_query = [f"state_fips == '{x}'" for x in state_fips_list]
             state_query = ' or '.join(state_list_query)
@@ -80,8 +60,6 @@ def download_location_fixed_coverage_by_state(run=False, as_of_date: str = '2024
                 filter_df = reference_df_filtered.query(f"{state_query}")
         else:
             raise GussExceptions(message="No state fips list provided")
-
-
 
         if num_technology > 1:
 
@@ -114,14 +92,12 @@ def download_location_fixed_coverage_by_state(run=False, as_of_date: str = '2024
 
         elif num_provider == 1:
             if 'all' in provider_id_list:
-
                 filter_df = filter_df
             else:
                 provider_id_query = f"provider_id == '{provider_id_list[0]}'"
                 filter_df = filter_df.query(provider_id_query)
         else:
             raise GussExceptions(message="No provider id list provided")
-
 
         filter_df = filter_df.sort_values(
             by=['provider_id', 'state_fips', "technology_code", 'speed_tier'])
@@ -141,5 +117,3 @@ def download_location_fixed_coverage_by_state(run=False, as_of_date: str = '2024
             output_path.append(saved_output)
 
         return output_path
-
-
