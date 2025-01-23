@@ -21,29 +21,29 @@ class Guss:
         self.__request_header = None
         self.__request_param = None
         self.__response = None
-        self.category = {1: 'Summary', 2: "State", 3: "Provider"}
-        self.subcategory = {1: "summary by Geography Type - CensusPlace",
-                            2: "Summary by Geography Type - Other Geographies",
-                            3: "Summary by Geography Type - Census Place",
-                            4: "Provider Summary by Geography Type",
-                            5: "Provider Summary",
-                            6: "Provider List",
-                            7: "Location Coverage",
-                            8: "Hexagon Coverage",
-                            9: "Location Coverage",
-                            10: "Hexagon Coverage",
-                            11: "Raw Coverage",
-                            12: "Supporting Data"
-                            }
+        self.category_subcategory = {'Summary': {
+            1: "Summary by Geography Type - Census Place",
+            2: "Summary by Geography Type - Other Geographies",
+            3: "Summary by Geography Type - Census Place"
+        },
+            "State": {
+                1: "Provider List",
+                2: "Location Coverage",
+                3: "Hexagon Coverage",
+            },
+            "Provider": {
+                1: "Location Coverage",
+                2: "Hexagon Coverage",
+                3: 'RawCoverage',
+                4: 'Supporting Data'
+            }
+        }
         self.technology_type = {1: 'Fixed Broadband',
                                 2: 'Mobile Broadband',
                                 3: 'Mobile Voice'
                                 }
-        self.FiveG_speed_teir = ["35/3", "7/1"]
-
-
-
-
+        self.technology_code = None
+        self.FiveG_speed_tier = ["35/3", "7/1"]
 
     @property
     def baseUrl(self):
@@ -109,7 +109,8 @@ class Guss:
         return f"method: {self.request_type}, request_base_url: {self.baseUrl}, requst_end_point: {self.url_endpoint}, request_param: {self.request_param}"
 
     # saves output file in location
-    def save_file(self, response, output_path, file_name):
+    @classmethod
+    def save_file(cls, response, output_path, file_name):
         output = os.path.join(output_path, file_name)
         with open(output, 'wb') as f:
             f.write(response)
@@ -134,7 +135,7 @@ class Guss:
 
             # error handling
             status = r.status_code
-            if status >= 400 and status < 500:
+            if 400 <= status < 500:
                 r.raise_for_status()
 
             return r
@@ -230,7 +231,6 @@ class Guss:
                 self.url_endpoint = f"/api/public/map/downloads/downloadFile/{data_type}/{file_id}/{file_type}"
         else:
             self.url_endpoint = f"/api/public/map/downloads/downloadFile/{data_type}/{file_id}"
-
 
         saved_output = self.get_request(save_file=True, return_df=False, file_name=file_name, gis_data_type=gis_type)
 
