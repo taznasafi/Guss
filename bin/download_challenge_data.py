@@ -5,8 +5,8 @@ import re
 from guss import GUSS
 from guss.gussErrors import GussExceptions
 
-def download_challenge_data(run=False, as_of_date=None, category=None, state_fips_list:list=None):
 
+def download_challenge_data(run=False, as_of_date=None, category=None, state_fips_list: list = None):
     if run:
 
         credentials = ast.literal_eval(os.environ['credentials'])
@@ -22,10 +22,9 @@ def download_challenge_data(run=False, as_of_date=None, category=None, state_fip
                 'category': category
             }
 
-
         reference_df = guss.list_challenge_data(as_of_date=as_of_date,
-                            params=category_params,
-                            file_name=f"challenge_data_as_of_{as_of_date}.csv")
+                                                params=category_params,
+                                                file_name=f"challenge_data_as_of_{as_of_date}.csv")
 
         num_state = len(state_fips_list)
 
@@ -45,7 +44,6 @@ def download_challenge_data(run=False, as_of_date=None, category=None, state_fip
         else:
             raise GussExceptions(message="No state fips list provided")
 
-
         if len(reference_df_filtered) == 0:
             raise GussExceptions("check your query params:\n"
                                  f"{reference_df_filtered}\n"
@@ -53,7 +51,6 @@ def download_challenge_data(run=False, as_of_date=None, category=None, state_fip
         else:
             print(f"There are about {len(reference_df_filtered)} download files using the following query:"
                   f"\nt\{state_query}")
-
 
         output_path = []
 
@@ -69,8 +66,3 @@ def download_challenge_data(run=False, as_of_date=None, category=None, state_fip
             output_path.append(saved_output)
 
         return output_path
-
-
-
-
-
