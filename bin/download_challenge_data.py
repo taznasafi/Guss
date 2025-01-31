@@ -33,14 +33,20 @@ def download_challenge_data(run=False, as_of_date=None, category=None, state_fip
             state_list_query = [f"state_fips == '{x}'" for x in state_fips_list]
 
             if 'all' in [x.lower() for x in state_fips_list]:
+
                 reference_df_filtered = reference_df
             else:
                 state_query = ' or '.join(state_list_query)
                 reference_df_filtered = reference_df.query(f"{state_query}")
 
         elif num_state == 1:
-            state_query = f"state_fips == '{state_fips_list[0]}'"
-            reference_df_filtered = reference_df.query(f"{state_query}")
+            state_query = ''
+            if 'all' in [x.lower() for x in state_fips_list]:
+                reference_df_filtered = reference_df
+            else:
+
+                state_query = f"state_fips == '{state_fips_list[0]}'"
+                reference_df_filtered = reference_df.query(f"{state_query}")
         else:
             raise GussExceptions(message="No state fips list provided")
 
@@ -49,8 +55,7 @@ def download_challenge_data(run=False, as_of_date=None, category=None, state_fip
                                  f"{reference_df_filtered}\n"
                                  "I got no query back. Try again")
         else:
-            print(f"There are about {len(reference_df_filtered)} download files using the following query:"
-                  f"\nt\{state_query}")
+            print(f"There are about {len(reference_df_filtered)} download files using the following query:{state_query}")
 
         output_path = []
 

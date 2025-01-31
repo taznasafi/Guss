@@ -62,17 +62,17 @@ if __name__ == '__main__':
                                                                                   gis_type="gpkg")
 
         # fixed coverage csv
-        output_fixed_coverage_availiablity = download_location_fixed_coverage_by_state(run=True,
+        output_fixed_coverage_availiablity = download_location_fixed_coverage_by_state(run=False,
                                                                                       as_of_date='2024-06-30',
                                                                                       provider_id_list=['all'],
                                                                                       state_fips_list=['all'],
                                                                                       technology_list=[10,40,50,60,61,70,71,72,0]
                                                                                       )
 
-        out_challenge_data = download_challenge_data(run=False,
+        out_challenge_data = download_challenge_data(run=True,
                                                      as_of_date='2024-06-30',
-                                                     category='Fabric Challenge - In Progress',
-                                                     state_fips_list=['all'])
+                                                     category='Mobile Challenge - Resolved',
+                                                     state_fips_list=["all"])
 
         print(out_challenge_data)
 
