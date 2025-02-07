@@ -177,15 +177,15 @@ class Guss:
                     return warnings.warn("please enter a filename")
                 return df
             else:
-                if save_file and file_name:
+                if (save_file and file_name) and gis_data_type is None:
                     output = os.path.join(CSV_OUTPUT, file_name)
                     print(output)
                     self.save_file(self.response.content, output_path=CSV_OUTPUT, file_name=file_name)
                     return output
                 else:
-                    GussExceptions(message="It looks like you did not provide file_name. please provide valid name")
+                    GussExceptions(message="It looks like you did not provide csv file_name. please provide valid name")
 
-            if save_file and file_name:
+            if save_file and file_name and (str(gis_data_type).lower() == 'gpkg' or str(gis_data_type).lower() == 'shp'):
                 if str(gis_data_type).lower() == 'gpkg':
                     self.save_file(response=self.response.content, output_path=GPK_OUTPUT, file_name=file_name)
                     return os.path.join(GPK_OUTPUT, file_name)
