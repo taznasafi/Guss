@@ -1,6 +1,9 @@
 # Guss The FCC BDC API Python 
 
-This Python package provides an easy-to-use interface for interacting with the Federal Communications Commission (FCC) Broadband Data Collection (BDC) API. It allows users to programmatically download mobile broadband service data, including availability, speeds, providers, and other relevant information for various geographic locations in the United States.
+This Python package provides an easy-to-use interface for interacting with the Federal 
+Communications Commission (FCC) Broadband Data Collection (BDC) API. It allows users to
+programmatically download fixed and mobile broadband service coverage data, including availability, speeds,
+providers, and other relevant information for various states in the United States.
 
 ## Features
 
@@ -13,7 +16,7 @@ This Python package provides an easy-to-use interface for interacting with the F
 ## Requirements
 
 - Python 3.6 or higher
-- Requests library (for making API calls)
+- Requests library 
 - Pandas
 - python-dotenv
   
@@ -62,17 +65,19 @@ In the root directory of your project, create a new file named .env.
 
 ### Add the following content to the .env file:
 This file will store your credentials and configuration settings, such as the API credentials and base URL. 
-To get your API credentials please visit: https://bdc.fcc.gov/ register to create an account to get your username and hash code (api key) which you can copy and paste in the .env file using the structure provided below:
+To get your API credentials please visit: https://bdc.fcc.gov/ register to create an account to get your
+username and hash code (api key) which you can copy and paste in the .env file using the structure provided below:
 ```
 
-credentials = {'USERNAME':'', 'HASH_VALUE':''}
+credentials = {'USERNAME':'your.email@domain.com', 'HASH_VALUE':'your registerd api ke'}
 BASE_URL = 'https://broadbandmap.fcc.gov'
 ```
 ---
 
 ### Running `main.py` in VSCode Interpreter
 
-Follow these steps to run a `main.py` Python file using the Visual Studio Code (VSCode) interpreter.
+Follow these steps to run a `main.py` Python file using the Visual Studio Code (VSCode) interpreter or any python 
+interpreter of you choice. Example below is for Vscode only
 
 #### 1. **Open VSCode**
 
@@ -104,7 +109,8 @@ To open your project folder in VSCode:
 
 1. Press `Ctrl+Shift+P` (or `Cmd+Shift+P` on macOS) to open the Command Palette.
 2. Type **Python: Select Interpreter** and select it.
-3. Choose the Python interpreter you want to use (make sure it’s the one where your dependencies are installed, such as your virtual environment or global Python installation).
+3. Choose the Python interpreter you want to use (make sure it’s the one where your dependencies are installed,
+   such as your virtual environment or global Python installation).
 
 ---
 
@@ -127,7 +133,8 @@ You have several options to run your Python file:
 
 ##### Option 2: Using the Integrated Terminal
 
-1. Open the integrated terminal in VSCode by clicking **Terminal** in the top menu and selecting **New Terminal**, or press `` Ctrl+` `` (backtick).
+1. Open the integrated terminal in VSCode by clicking **Terminal** in the top menu and selecting **New Terminal**,
+   or press `` Ctrl + ` `` (backtick).
 2. In the terminal, type the following command:
 
    ```bash
@@ -152,7 +159,7 @@ The function accepts various parameters to customize the query, enabling flexibi
 - **`provider_id_list`**: `list`
   - **Description**: A list of unique identifiers for the service provider(s) you wish to query.
   - If querying all providers, use `["ALL"]` to select all/any providers.
-  - **Example**: `["130077", "130403"]` or `["ALL"]`
+  - **Example**: `[130077, 130403]` or `["ALL"]`
     
 
 - **`state_fips_list`**: `list`
@@ -198,31 +205,71 @@ The function accepts various parameters to customize the query, enabling flexibi
 
 ```python
 
-from bin.download_mb_coverage import download_provider_coverage_data
+from bin.download_mb_coverage import download_provider_state_coverage_data
+from bin.download_fixed_coverage import download_location_fixed_coverage_by_state
+from bin.download_challenge_data import download_challenge_data
 from guss.gussErrors import GussExceptions
+
+
+
+
 
 if __name__ == '__main__':
 
     try:
-        download_provider_coverage_data(
-            run=True,
-            as_of_date="2024-06-30",
-            provider_id_list=[130077, 130403],
-            state_fips_list=['11'],
-            technology_list=[300, 400, 500],
-            technology_type="Mobile Broadband",
-            subcategory="Hexagon Coverage",
-            FiveG_speed_tier_list=["35/3", "7/1"],
-            gis_type="SHP"
-        )
-      except GussExceptions as e:
+
+        # hexagon coverage shp
+        output_raw_coverage_path_list = download_provider_state_coverage_data(run=True, as_of_date="2024-06-30",
+                                                                              provider_id_list=['all'],
+                                                                              state_fips_list=["11"],
+                                                                              technology_list=[400, 300, 500],
+                                                                              technology_type="Mobile Broadband",
+                                                                              subcategory='Hexagon Coverage',
+                                                                              fiveG_speed_tier_list=['7/1', '35/3'],
+                                                                              gis_type="shp")
+
+        # raw coverage gpkg
+        output_hexagon_coverage_path_list = download_provider_state_coverage_data(run=False, as_of_date="2024-06-30",
+                                                                                  provider_id_list=[130077, 130403,
+                                                                                                    131425, 131310],
+                                                                                  state_fips_list=["11"],
+                                                                                  technology_list=[400, 300, 500],
+                                                                                  technology_type="Mobile Broadband",
+                                                                                  subcategory='Raw Coverage',
+                                                                                  fiveG_speed_tier_list=['7/1', '35/3'],
+                                                                                  gis_type="gpkg")
+
+        # fixed coverage csv
+        output_fixed_coverage_availiablity = download_location_fixed_coverage_by_state(run=True,
+                                                                                      as_of_date='2024-06-30',
+                                                                                      provider_id_list=['all'],
+                                                                                      state_fips_list=['11'],
+                                                                                      technology_list=[10,40,50,60,61,70,71,72,0]
+                                                                                      )
+
+        out_challenge_data = download_challenge_data(run=True,
+                                                     as_of_date='2024-06-30',
+                                                     category='Mobile Challenge - Resolved',
+                                                     state_fips_list=["all"])
+
+
+
+    except GussExceptions as e:
         print(f"error: {e}")
+
 ```
-#### The code above will download ATT's (130077) and T-Mobile's (130403) Mobile Broadband Coverage in Washington D.C. represented as h3 hexagon. The output files will be outputed in the ~/data/output/shp folder.
+#### The code above will download 3 different broadband coverage files for any providers serving in Washington D.C.
+
+1. Mobile broadband coverage in Washington D.C. represented as h3 hexagon in a shapefile format.
+2. Raw mobile broadband coverage in Washington D.C. in a GeoPackage (gpkg) format.
+3. Fixed broadband coverage in Washington D.C. which is always outputed as CSV.
+
+
+The output files will be outputed in the ~/data/output/shp folder.
 
 ---
 ### Notes
-- Ensure that the as_of_date is correctly formatted as 'YYYY-MM-DD' to avoid errors.
-- The state_fips_list can include ["ALL"] if you need data for all U.S. states and territories. **Do not include 'ALL'** if individual states are desired. Same **Rule** applies to provider_id_list parameter.
+- Ensure that the as_of_date is correctly formatted as 'YYYY-MM-DD' to avoid errors. There are only two 2 annually filings per year. so please indicate either June 30 or December 31 for a given year. 
+- The state_fips_list or provider_id can include ["ALL"] if you need data for all U.S. states and territories or provider ids. **Do not include 'ALL'** if individual states are desired. Same **Rule** applies to provider_id_list parameter.
 - The FiveG_speed_tier_list is used for filtering 5G data based on download/upload speeds. Provide the values in the format "download_speed/upload_speed".
 - The gis_type option allows you to choose between Shapefile (SHP) or GeoPackage (GPKG) formats for geographic data
