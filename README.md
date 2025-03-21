@@ -267,7 +267,7 @@ if __name__ == '__main__':
 3. Fixed broadband coverage in Washington D.C. which is always outputed as CSV.
 
 
-The output files will be outputed in the ~/data/output/shp folder.
+The output files will be outputed in the ~/data/output/{file_format_type} folder.
 
 ---
 ### Notes
