@@ -1,4 +1,4 @@
-# Guss The FCC BDC API Python 
+# Guss The FCC BDC API 
 
 This Python package provides an easy-to-use interface for interacting with the Federal 
 Communications Commission (FCC) Broadband Data Collection (BDC) API. It allows users to
