@@ -32,6 +32,8 @@ def download_provider_state_coverage_data(run: bool = True,
     :return: list of downloaded coverage paths.
     """
 
+
+
     if technology_type == 'Mobile Broadband' or technology_type == 'Mobile Voice':
         pass
     else:
@@ -131,15 +133,18 @@ def download_provider_state_coverage_data(run: bool = True,
         else:
             raise GussExceptions(message="No speed tier list provided")
 
-        if ('all' in [x.lower() for x in state_fips_list]) and ('all' in [x.lower() for x in provider_id_list]):
-            query_string = f"({technology_query}) and ({speed_tier_query})"
-        elif 'all' in [x.lower() for x in state_fips_list]:
-            query_string = f"({provider_id_query}) and ({technology_query}) and ({speed_tier_query})"
-        elif 'all' in [x.lower() for x in provider_id_list]:
-            query_string = f"({state_query}) and ({technology_query}) and ({speed_tier_query})"
+        try:
+            if ('all' in [x.lower() for x in state_fips_list]) and ('all' in [x.lower() for x in provider_id_list]):
+                query_string = f"({technology_query}) and ({speed_tier_query})"
+            elif 'all' in [x.lower() for x in state_fips_list]:
+                query_string = f"({provider_id_query}) and ({technology_query}) and ({speed_tier_query})"
+            elif 'all' in [x.lower() for x in provider_id_list]:
+                query_string = f"({state_query}) and ({technology_query}) and ({speed_tier_query})"
 
-        else:
-            query_string = f"({provider_id_query}) and ({state_query}) and ({technology_query}) and ({speed_tier_query})"
+            else:
+                query_string = f"({provider_id_query}) and ({state_query}) and ({technology_query}) and ({speed_tier_query})"
+        except AttributeError:
+            raise GussExceptions(message="Please provide provider ids as string")
 
         filter_df = reference_df_filtered.query(f"{query_string}").sort_values(by=['provider_id', 'state_fips', "technology_code", 'speed_tier'])
 

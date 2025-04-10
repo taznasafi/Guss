@@ -51,9 +51,9 @@ if __name__ == '__main__':
                                                                               gis_type="shp")
 
         # raw coverage gpkg
-        output_hexagon_coverage_path_list = download_provider_state_coverage_data(run=False, as_of_date="2024-06-30",
-                                                                                  provider_id_list=[130077, 130403,
-                                                                                                    131425, 131310],
+        output_hexagon_coverage_path_list = download_provider_state_coverage_data(run=True, as_of_date="2024-06-30",
+                                                                                  provider_id_list=['130077', '130403',
+                                                                                                    '131425', '131310'],
                                                                                   state_fips_list=["11"],
                                                                                   technology_list=[400, 300, 500],
                                                                                   technology_type="Mobile Broadband",

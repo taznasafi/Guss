@@ -159,7 +159,7 @@ The function accepts various parameters to customize the query, enabling flexibi
 - **`provider_id_list`**: `list`
   - **Description**: A list of unique identifiers for the service provider(s) you wish to query.
   - If querying all providers, use `["ALL"]` to select all/any providers.
-  - **Example**: `[130077, 130403]` or `["ALL"]`
+  - **Example**: `["130077", "130403"]` or `["ALL"]`
     
 
 - **`state_fips_list`**: `list`
@@ -232,8 +232,8 @@ if __name__ == '__main__':
         # raw coverage gpkg
         download_provider_state_coverage_data(run=False, 
                                               as_of_date="2024-06-30",
-                                              provider_id_list=[130077, 130403,
-                                                                131425, 131310],
+                                              provider_id_list=['130077', '130403',
+                                                                '131425', '131310'],
                                               state_fips_list=["11"],
                                               technology_list=[400, 300, 500],
                                               technology_type="Mobile Broadband",
