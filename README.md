@@ -18,7 +18,11 @@ providers, and other relevant information for various states in the United State
 - Python 3.6 or higher
 - Requests library 
 - Pandas
-- python-dotenv
+- GeoPandas
+- h3
+- Pyogrio
+- Pyarrow
+- Python-dotenv
   
 ## Installation
 
