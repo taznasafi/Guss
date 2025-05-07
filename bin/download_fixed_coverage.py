@@ -2,15 +2,19 @@ import os
 import ast
 import warnings
 import re
+import pandas as pd
+import geopandas as gpd
 from guss import GUSS
 from guss.gussErrors import GussExceptions
-
+from guss.GUSS import GPK_OUTPUT, SHP_OUTPUT
 
 def download_location_fixed_coverage_by_state(run=False, as_of_date: str = '2024-06-30',
                                               data_type: object = 'availability',
                                               provider_id_list: list = None,
                                               state_fips_list: list = None,
-                                              technology_list: list = None) -> list:
+                                              technology_list: list = None,
+                                              polygonize=False,
+                                              gis_type='gpkg') -> list:
     if data_type == 'availability':
         pass
     else:
@@ -106,7 +110,7 @@ def download_location_fixed_coverage_by_state(run=False, as_of_date: str = '2024
 
         # print(filter_df[['technology_code', "provider_id", 'file_name']])
 
-        output_path = []
+        output_path_list = []
         for i, row in filter_df.iterrows():
             print(row['file_name'])
 
@@ -114,6 +118,27 @@ def download_location_fixed_coverage_by_state(run=False, as_of_date: str = '2024
             file_name = f"{technology_type.replace(' ', '')}_{subcategory.replace(' ', '')}_{row['file_name']}.zip"
 
             saved_output = guss.download_file(data_type=data_type, file_id=file_id, file_name=file_name, gis_type=None)
-            output_path.append(saved_output)
 
-        return output_path
+            if polygonize:
+                df = pd.read_csv(saved_output, compression='zip')
+                df['geometry'] = df['h3_res8_id'].apply(guss.polygonize)
+
+                gdf = gpd.GeoDataFrame(df, geometry='geometry', crs=4326)
+                if gis_type == 'gpkg':
+                    output_path = os.path.join(GPK_OUTPUT, file_name.replace('.zip', '.gpkg'))
+                    layer_name = file_name.replace('.zip', '.gpkg')
+                    gdf.to_file(output_path, layer=layer_name)
+                    print(f"GeoPackage saved to {output_path}")
+
+                elif gis_type == 'shp':
+                    output_path = os.path.join(SHP_OUTPUT, file_name.replace('.zip', '.shp'))
+                    gdf.to_file(output_path)
+                    print(f"shp saved to {output_path}")
+                else:
+                    raise GussExceptions(message="Oh no, gis_type was not provided, please indicate gis_type = 'shp' "
+                                                 "or 'gpkg'")
+
+            output_path_list.append(saved_output)
+
+
+        return output_path_list

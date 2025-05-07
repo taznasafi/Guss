@@ -5,7 +5,10 @@ import json
 import os
 import ast
 from guss.gussErrors import GussExceptions
-from guss.GEO_CENSEY import Fipsy
+import h3
+from shapely.geometry import Polygon
+
+
 
 from . import DATA_INPUT, DATA_OUTPUT, CSV_OUTPUT, GPK_OUTPUT, SHP_OUTPUT
 
@@ -267,3 +270,8 @@ class Guss:
         # error handling
         except GussExceptions as e:
             raise GussExceptions(f"error: {e}")
+
+    def polygonize(self, hex_id):
+        coords = h3.h3_to_geo_boundary(hex_id)
+        flipped = tuple(coord[::-1] for coord in coords)
+        return Polygon(flipped)

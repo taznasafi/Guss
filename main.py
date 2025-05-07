@@ -1,8 +1,6 @@
 from bin.download_mb_coverage import download_provider_state_coverage_data
 from bin.download_fixed_coverage import download_location_fixed_coverage_by_state
 from bin.download_challenge_data import download_challenge_data
-
-
 from guss.gussErrors import GussExceptions
 
 ### how to use Guss to download bdc data
@@ -40,36 +38,49 @@ if __name__ == '__main__':
 
     try:
 
-        # hexagon coverage shp
-        output_raw_coverage_path_list = download_provider_state_coverage_data(run=True, as_of_date="2024-06-30",
+        # hexagon coverage -- shp
+        output_hexagon_coverage_path_list = download_provider_state_coverage_data(run=False, as_of_date="2024-06-30",
+                                                                                  provider_id_list=['all'],
+                                                                                  state_fips_list=["11"],
+                                                                                  technology_list=[300, 400, 500],
+                                                                                  technology_type="Mobile Broadband",
+                                                                                  subcategory='Hexagon Coverage',
+                                                                                  fiveG_speed_tier_list=['7/1', '35/3'],
+                                                                                  gis_type="shp")
+
+        # raw coverage -- gpkg
+        output_raw_coverage_path_list = download_provider_state_coverage_data(run=False, as_of_date="2024-06-30",
                                                                               provider_id_list=['all'],
                                                                               state_fips_list=["11"],
-                                                                              technology_list=[400, 300, 500],
+                                                                              technology_list=[300, 400, 500],
                                                                               technology_type="Mobile Broadband",
-                                                                              subcategory='Hexagon Coverage',
+                                                                              subcategory='Raw Coverage',
                                                                               fiveG_speed_tier_list=['7/1', '35/3'],
-                                                                              gis_type="shp")
+                                                                              gis_type="gpkg")
 
-        # raw coverage gpkg
-        output_hexagon_coverage_path_list = download_provider_state_coverage_data(run=True, as_of_date="2024-06-30",
-                                                                                  provider_id_list=['130077', '130403',
-                                                                                                    '131425', '131310'],
-                                                                                  state_fips_list=["11"],
-                                                                                  technology_list=[400, 300, 500],
-                                                                                  technology_type="Mobile Broadband",
-                                                                                  subcategory='Raw Coverage',
-                                                                                  fiveG_speed_tier_list=['7/1', '35/3'],
-                                                                                  gis_type="gpkg")
+        # fixed coverage -- GIS
+        output_fixed_coverage_availability_gis = download_location_fixed_coverage_by_state(run=False,
+                                                                                           as_of_date='2024-06-30',
+                                                                                           provider_id_list=['all'],
+                                                                                           state_fips_list=['11'],
+                                                                                           technology_list=[10, 40, 50,
+                                                                                                            60, 61, 70,
+                                                                                                            71, 72, 0],
+                                                                                           polygonize=True,
+                                                                                           gis_type='gpkg',
+                                                                                           )
 
-        # fixed coverage csv
-        output_fixed_coverage_availiablity = download_location_fixed_coverage_by_state(run=True,
-                                                                                      as_of_date='2024-06-30',
-                                                                                      provider_id_list=['all'],
-                                                                                      state_fips_list=['11'],
-                                                                                      technology_list=[10,40,50,60,61,70,71,72,0]
-                                                                                      )
-
-        out_challenge_data = download_challenge_data(run=True,
+        # fixed coverage -- CSV
+        output_fixed_coverage_availability_csv = download_location_fixed_coverage_by_state(run=True,
+                                                                                       as_of_date='2024-06-30',
+                                                                                       provider_id_list=['all'],
+                                                                                       state_fips_list=['11'],
+                                                                                       technology_list=[10, 40, 50, 60,
+                                                                                                        61, 70, 71, 72,
+                                                                                                        0],
+                                                                                       polygonize=False)
+        # Challenge Data
+        out_challenge_data = download_challenge_data(run=False,
                                                      as_of_date='2024-06-30',
                                                      category='Mobile Challenge - Resolved',
                                                      state_fips_list=["all"])

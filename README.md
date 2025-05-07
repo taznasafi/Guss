@@ -152,15 +152,17 @@ The function accepts various parameters to customize the query, enabling flexibi
     - `True`: Run the function.
     - `False`: Dry run (for testing or simulation purposes).
   
+
 - **`as_of_date`**: `string`
   - **Description**: A required date parameter that specifies the reference date for the data in `YYYY-MM-DD` format.
   - **Example**: `"2024-12-01"`
+
 
 - **`provider_id_list`**: `list`
   - **Description**: A list of unique identifiers for the service provider(s) you wish to query.
   - If querying all providers, use `["ALL"]` to select all/any providers.
   - **Example**: `["130077", "130403"]` or `["ALL"]`
-    
+  
 
 - **`state_fips_list`**: `list`
   - **Description**: A list of 2-digit FIPS codes for the states or territories you want to include in the query. The FIPS code should be included with a leading zero. 
@@ -168,6 +170,7 @@ The function accepts various parameters to customize the query, enabling flexibi
     - If querying specific states/territories, provide the list of FIPS codes (e.g., `["01", "06"]` for Alabama and California).
     - If querying all FIPS codes, use `["ALL"]` to select all states/territories.
   - **Example**: `["01", "06"] or ["ALL"]`
+
 
 - **`technology_list`**: `list`
   - **Description**: A list of technology codes used by the service provider to report service availability. Each code corresponds to a specific technology.
@@ -177,11 +180,13 @@ The function accepts various parameters to customize the query, enabling flexibi
     - `500`: 5G-NR
   - **Example**: `[300, 400, 500]`
 
+
 - **`technology_type`**: `string`
   - **Description**: The type of technology being queried. The available options are:
     - `'Mobile Broadband'`
     - `'Mobile Voice'`
   - **Example**: `"Mobile Broadband"`
+
 
 - **`subcategory`**: `string`
   - **Description**: A string to specify the subcategory of coverage data. Valid options are:
@@ -189,16 +194,29 @@ The function accepts various parameters to customize the query, enabling flexibi
     - `'Raw Coverage'`
   - **Example**: `"Hexagon Coverage"`
 
+
 - **`FiveG_speed_tier_list`**: `list`
-  - **Description**: A list of 5G speed tiers to filter the data. The format is `"download_speed/upload_speed"`.
+  - **Description**: A list of **5G** speed tiers. The format is `"download_speed/upload_speed"`.
+    Valid options are:
+    - `"35/3"`: 35 mbps download / 3 mbps upload.
+    - `"7/1"`: 7 mbps download / 1 mbps upload.
   - **Example**: `["35/3", "7/1"]`
 
+
 - **`gis_type`**: `string`
-  - **Description**: The type of GIS file format in which the data should be returned. Valid options are:
+  - **Description**: The type of GIS file format in which the data should be returned.
+    Valid options are:
     - `"SHP"`: Shapefile format.
     - `"GPKG"`: GeoPackage format.
-  - **Example**: `"SHP"`
+  - **Example**: `"shp" or "gpkg"`
+  
 
+- **`polygonize`**: `bool`
+  - **Description**: A boolean flag that indicates whether the function should create geometry based on H3 hex id.
+    - `True`: Create geometry based on H3 hex id.
+    - `False`: Do not create geometry based on H3 hex id.
+  - **Example**: `True or False`
+  
 ---
 
 ### Example Usage in main.py
@@ -218,60 +236,72 @@ if __name__ == '__main__':
 
     try:
 
-        # hexagon coverage shp
-        download_provider_state_coverage_data(run=True, 
-                                              as_of_date="2024-06-30",
-                                              provider_id_list=['all'],
-                                              state_fips_list=["11"],
-                                              technology_list=[400, 300, 500],
-                                              technology_type="Mobile Broadband",
-                                              subcategory='Hexagon Coverage',
-                                              fiveG_speed_tier_list=['7/1', '35/3'],
-                                              gis_type="shp")
+        # hexagon coverage -- shp
+        output_hexagon_coverage_path_list = download_provider_state_coverage_data(run=False, as_of_date="2024-06-30",
+                                                                                  provider_id_list=['all'],
+                                                                                  state_fips_list=["11"],
+                                                                                  technology_list=[300, 400, 500],
+                                                                                  technology_type="Mobile Broadband",
+                                                                                  subcategory='Hexagon Coverage',
+                                                                                  fiveG_speed_tier_list=['7/1', '35/3'],
+                                                                                  gis_type="shp")
 
-        # raw coverage gpkg
-        download_provider_state_coverage_data(run=False, 
-                                              as_of_date="2024-06-30",
-                                              provider_id_list=['130077', '130403',
-                                                                '131425', '131310'],
-                                              state_fips_list=["11"],
-                                              technology_list=[400, 300, 500],
-                                              technology_type="Mobile Broadband",
-                                              subcategory='Raw Coverage',
-                                              fiveG_speed_tier_list=['7/1', '35/3'],
-                                              gis_type="gpkg")
+        # raw coverage -- gpkg
+        output_raw_coverage_path_list = download_provider_state_coverage_data(run=False, as_of_date="2024-06-30",
+                                                                              provider_id_list=['all'],
+                                                                              state_fips_list=["11"],
+                                                                              technology_list=[300, 400, 500],
+                                                                              technology_type="Mobile Broadband",
+                                                                              subcategory='Raw Coverage',
+                                                                              fiveG_speed_tier_list=['7/1', '35/3'],
+                                                                              gis_type="gpkg")
 
-        # fixed coverage csv
-        download_location_fixed_coverage_by_state(run=True,
-                                                  as_of_date='2024-06-30',
-                                                  provider_id_list=['all'],
-                                                  state_fips_list=['11'],
-                                                  technology_list=[10,40,50,60,61,70,71,72,0]
-                                                  )
+        # fixed coverage -- GIS
+        output_fixed_coverage_availability_gis = download_location_fixed_coverage_by_state(run=False,
+                                                                                           as_of_date='2024-06-30',
+                                                                                           provider_id_list=['all'],
+                                                                                           state_fips_list=['11'],
+                                                                                           technology_list=[10, 40, 50,
+                                                                                                            60, 61, 70,
+                                                                                                            71, 72, 0],
+                                                                                           polygonize=True,
+                                                                                           gis_type='gpkg',
+                                                                                           )
 
-        download_challenge_data(run=True,
-                               as_of_date='2024-06-30',
-                               category='Mobile Challenge - Resolved',
-                               state_fips_list=["all"])
+        # fixed coverage -- CSV
+        output_fixed_coverage_availability_csv = download_location_fixed_coverage_by_state(run=True,
+                                                                                       as_of_date='2024-06-30',
+                                                                                       provider_id_list=['all'],
+                                                                                       state_fips_list=['11'],
+                                                                                       technology_list=[10, 40, 50, 60,
+                                                                                                        61, 70, 71, 72,
+                                                                                                        0],
+                                                                                       polygonize=False)
+        # Challenge Data
+        out_challenge_data = download_challenge_data(run=False,
+                                                     as_of_date='2024-06-30',
+                                                     category='Mobile Challenge - Resolved',
+                                                     state_fips_list=["all"])
 
 
 
     except GussExceptions as e:
         print(f"error: {e}")
-
 ```
+
 #### The code above will download 3 different broadband coverage files for any providers serving in Washington D.C.
 
 1. Mobile broadband coverage in Washington D.C. represented as h3 hexagon in a shapefile format.
 2. Raw mobile broadband coverage in Washington D.C. in a GeoPackage (gpkg) format.
-3. Fixed broadband coverage in Washington D.C. which is always outputed as CSV.
+3. Fixed broadband coverage in Washington D.C. outputted as gpkg or CSV format.
+
 
 
 The output files will be outputed in the ~/data/output/{file_format_type} folder.
 
 ---
 ### Notes
-- Ensure that the as_of_date is correctly formatted as 'YYYY-MM-DD' to avoid errors. There are only two 2 annually filings per year. so please indicate either June 30 or December 31 for a given year. 
-- The state_fips_list or provider_id can include ["ALL"] if you need data for all U.S. states and territories or provider ids. **Do not include 'ALL'** if individual states are desired. Same **Rule** applies to provider_id_list parameter.
-- The FiveG_speed_tier_list is used for filtering 5G data based on download/upload speeds. Provide the values in the format "download_speed/upload_speed".
+- Ensure that the **as_of_date** is correctly formatted as 'YYYY-MM-DD' to avoid errors. There are only two 2 annually filings per year. so please indicate either June 30 or December 31 for a given year. 
+- The **state_fips_list** or **provider_id** can include **["ALL"]** if you need data for all U.S. states and territories or provider ids. **Do not include 'ALL'** if individual states are desired. Same **Rule** applies to provider_id_list parameter.
+- The **FiveG_speed_tier_list** is used for filtering 5G data based on download/upload speeds. Provide the values in the format "download_speed/upload_speed".
 - The gis_type option allows you to choose between Shapefile (SHP) or GeoPackage (GPKG) formats for geographic data

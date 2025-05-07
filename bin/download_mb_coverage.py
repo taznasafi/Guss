@@ -32,8 +32,6 @@ def download_provider_state_coverage_data(run: bool = True,
     :return: list of downloaded coverage paths.
     """
 
-
-
     if technology_type == 'Mobile Broadband' or technology_type == 'Mobile Voice':
         pass
     else:
@@ -52,15 +50,10 @@ def download_provider_state_coverage_data(run: bool = True,
         raise GussExceptions(message="Please make sure that the data_type should be:\n"
                                      "\t 1) availability (default value)")
 
-
-
-
-
     if run:
 
         credentials = ast.literal_eval(os.environ['credentials'])
         guss = GUSS.Guss(**credentials)
-
 
         reference_df = guss.get_download_reference(as_of_date=as_of_date)
 
@@ -114,22 +107,37 @@ def download_provider_state_coverage_data(run: bool = True,
         else:
             raise GussExceptions(message="No technology id list provided")
 
-        if num_speed_tier > 1:
-            if ((400 in technology_list) or (300 in technology_list)) and not (500 in technology_list):
+        if num_speed_tier == 2:
+            print(num_speed_tier)
+            if ((400 in technology_list) and (300 in technology_list)) and not (500 in technology_list):
                 speed_tier_list_query = [f"speed_tier.isna()" for x in technology_list]
             elif ((400 in technology_list) or (300 in technology_list)) and (500 in technology_list):
                 speed_tier_lower_tech = [f"speed_tier.isna()" for x in [400]]
                 speed_tier_5G_tech = [f"speed_tier == '{str(x)}'" for x in fiveG_speed_tier_list]
-                speed_tier_list_query = speed_tier_lower_tech+speed_tier_5G_tech
+                speed_tier_list_query = speed_tier_lower_tech + speed_tier_5G_tech
 
             else:
                 speed_tier_list_query = [f"speed_tier == '{str(x)}'" for x in fiveG_speed_tier_list]
 
             speed_tier_query = ' or '.join(speed_tier_list_query)
         elif num_speed_tier == 1:
-            if (400 in technology_list) or (300 in technology_list):
-                fiveG_speed_tier_list.append("speed_tier.isnull()")
-            speed_tier_query = f"speed_tier == '{technology_list[0]}'"
+            print(num_speed_tier)
+            if (400 in technology_list) and (300 in technology_list) and not (500 in technology_list):
+                speed_tier_list_query = [f"speed_tier.isna()" for x in technology_list]
+            elif ((400 in technology_list) or (300 in technology_list)) or (500 in technology_list):
+                speed_tier_lower_tech = [f"speed_tier.isna()" for x in [400]]
+                speed_tier_5G_tech = [f"speed_tier == '{str(x)}'" for x in fiveG_speed_tier_list]
+                speed_tier_list_query = speed_tier_lower_tech + speed_tier_5G_tech
+            else:
+                speed_tier_list_query = [f"speed_tier == '{str(x)}'" for x in fiveG_speed_tier_list]
+
+            speed_tier_query = ' or '.join(speed_tier_list_query)
+
+        elif num_speed_tier == 0 and (500 in technology_list):
+            raise GussExceptions(message="No speed tier list provided with technology 500 in technology list")
+
+# speed_tier_list_query = [f"speed_tier.isna()" for x in technology_list]
+# speed_tier_query = ' or '.join(speed_tier_list_query)
         else:
             raise GussExceptions(message="No speed tier list provided")
 
@@ -146,17 +154,16 @@ def download_provider_state_coverage_data(run: bool = True,
         except AttributeError:
             raise GussExceptions(message="Please provide provider ids as string")
 
-        filter_df = reference_df_filtered.query(f"{query_string}").sort_values(by=['provider_id', 'state_fips', "technology_code", 'speed_tier'])
+        filter_df = reference_df_filtered.query(f"{query_string}").sort_values(
+            by=['provider_id', 'state_fips', "technology_code", 'speed_tier'])
 
-
-        if len(filter_df)==0:
+        if len(filter_df) == 0:
             raise GussExceptions("check your query params:\n"
                                  f"{query_string}\n"
                                  "I got no query back. Try again")
         else:
             print(f"There are about {len(filter_df)} download files using the following query:"
                   f"\nt\{query_string}")
-
 
         output_path = []
         for i, row in filter_df.iterrows():
@@ -165,9 +172,8 @@ def download_provider_state_coverage_data(run: bool = True,
             file_id = row['file_id']
             file_name = f"{technology_type.replace(' ', '')}_{subcategory.replace(' ', '')}_{row['file_name']}.zip"
 
-            saved_output = guss.download_file(data_type=data_type, file_id=file_id, file_name=file_name, gis_type=gis_type)
+            saved_output = guss.download_file(data_type=data_type, file_id=file_id, file_name=file_name,
+                                              gis_type=gis_type)
             output_path.append(saved_output)
 
         return output_path
-
-
