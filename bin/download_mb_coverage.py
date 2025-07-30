@@ -32,8 +32,12 @@ def download_provider_state_coverage_data(run: bool = True,
     :return: list of downloaded coverage paths.
     """
 
-    if technology_type == 'Mobile Broadband' or technology_type == 'Mobile Voice':
+    if technology_type == 'Mobile Broadband':
+        print("passing")
         pass
+    elif technology_type == 'Mobile Voice':
+        print("Since you selected Mobile Voice, I am changing the technology code list to [999]")
+        technology_list = [999]
     else:
         raise GussExceptions(message="Please make sure that the technology code should be:\n"
                                      "\t 1) Mobile Broadband\n\t2) Mobile Voice")
@@ -118,8 +122,10 @@ def download_provider_state_coverage_data(run: bool = True,
 
             else:
                 speed_tier_list_query = [f"speed_tier == '{str(x)}'" for x in fiveG_speed_tier_list]
-
-            speed_tier_query = ' or '.join(speed_tier_list_query)
+            if '999' in technology_list:
+                speed_tier_query = ""
+            else:
+                speed_tier_query = ' or '.join(speed_tier_list_query)
         elif num_speed_tier == 1:
             print(num_speed_tier)
             if (400 in technology_list) and (300 in technology_list) and not (500 in technology_list):
@@ -131,7 +137,10 @@ def download_provider_state_coverage_data(run: bool = True,
             else:
                 speed_tier_list_query = [f"speed_tier == '{str(x)}'" for x in fiveG_speed_tier_list]
 
-            speed_tier_query = ' or '.join(speed_tier_list_query)
+            if '999' in technology_list:
+                speed_tier_query = ""
+            else:
+                speed_tier_query = ' or '.join(speed_tier_list_query)
 
         elif num_speed_tier == 0 and (500 in technology_list):
             raise GussExceptions(message="No speed tier list provided with technology 500 in technology list")
@@ -142,6 +151,7 @@ def download_provider_state_coverage_data(run: bool = True,
             raise GussExceptions(message="No speed tier list provided")
 
         try:
+
             if ('all' in [x.lower() for x in state_fips_list]) and ('all' in [x.lower() for x in provider_id_list]):
                 query_string = f"({technology_query}) and ({speed_tier_query})"
             elif 'all' in [x.lower() for x in state_fips_list]:
