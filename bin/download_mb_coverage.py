@@ -37,7 +37,7 @@ def download_provider_state_coverage_data(run: bool = True,
         pass
     elif technology_type == 'Mobile Voice':
         print("Since you selected Mobile Voice, I am changing the technology code list to [999]")
-        technology_list = [999]
+        technology_list = ["999"]
     else:
         raise GussExceptions(message="Please make sure that the technology code should be:\n"
                                      "\t 1) Mobile Broadband\n\t2) Mobile Voice")
@@ -145,22 +145,42 @@ def download_provider_state_coverage_data(run: bool = True,
         elif num_speed_tier == 0 and (500 in technology_list):
             raise GussExceptions(message="No speed tier list provided with technology 500 in technology list")
 
-# speed_tier_list_query = [f"speed_tier.isna()" for x in technology_list]
-# speed_tier_query = ' or '.join(speed_tier_list_query)
+        elif num_speed_tier == 0 and (300 in technology_list or 400 in technology_list or 500 in technology_list):
+            raise GussExceptions(message="Since Your asking for mobile voice, please remove the technology code(s)"
+                                         " in technology_list parameter")
+        elif num_speed_tier == 0 and "999" in technology_list:
+            pass
+
+
         else:
             raise GussExceptions(message="No speed tier list provided")
 
         try:
 
             if ('all' in [x.lower() for x in state_fips_list]) and ('all' in [x.lower() for x in provider_id_list]):
-                query_string = f"({technology_query}) and ({speed_tier_query})"
+                if '999' in technology_list:
+                    query_string = f"({technology_query})"
+                else:
+                    query_string = f"({technology_query}) and ({speed_tier_query})"
+
             elif 'all' in [x.lower() for x in state_fips_list]:
-                query_string = f"({provider_id_query}) and ({technology_query}) and ({speed_tier_query})"
+                if '999' in technology_list:
+                    query_string = f"({provider_id_query}) and ({technology_query})"
+                else:
+                    query_string = f"({provider_id_query}) and ({technology_query}) and ({speed_tier_query})"
+
             elif 'all' in [x.lower() for x in provider_id_list]:
-                query_string = f"({state_query}) and ({technology_query}) and ({speed_tier_query})"
+                if '999' in technology_list:
+                    query_string = f"({state_query}) and ({technology_query})"
+                else:
+                    query_string = f"({state_query}) and ({technology_query}) and ({speed_tier_query})"
+
 
             else:
-                query_string = f"({provider_id_query}) and ({state_query}) and ({technology_query}) and ({speed_tier_query})"
+                if '999' in technology_list:
+                    query_string = f"({provider_id_query}) and ({state_query}) and ({technology_query})"
+                else:
+                    query_string = f"({provider_id_query}) and ({state_query}) and ({technology_query}) and ({speed_tier_query})"
         except AttributeError:
             raise GussExceptions(message="Please provide provider ids as string")
 
