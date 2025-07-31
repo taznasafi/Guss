@@ -75,7 +75,7 @@ def download_location_fixed_coverage_by_state(run=False, as_of_date: str = '2024
 
             technology_query = "|".join(technology_list)
 
-            technology_query = fr"\b({technology_query})\b"
+            technology_query = fr"\b(?:{technology_query})\b"
 
             filter_df = filter_df[
                 filter_df['technology_code'].str.contains(technology_query, flags=re.IGNORECASE, regex=True)]
@@ -108,7 +108,7 @@ def download_location_fixed_coverage_by_state(run=False, as_of_date: str = '2024
 
         print(f"There are total of {len(filter_df)} number of files.")
 
-        # print(filter_df[['technology_code', "provider_id", 'file_name']])
+
 
         output_path_list = []
         for i, row in filter_df.iterrows():
